@@ -4,11 +4,12 @@ import android.app.Instrumentation;
 import android.app.UiAutomation;
 import android.content.Context;
 import androidx.test.InstrumentationRegistry;
-import androidx.test.runner.AndroidJUnit4;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.uiautomator.UiObject;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import com.netease.open.hrpc.backend.RpcServer;
+
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,7 +17,6 @@ import org.junit.runner.RunWith;
 import java.util.HashMap;
 import java.util.LinkedList;
 
-import static org.junit.Assert.assertEquals;
 
 /**
  * Instrumentation test, which will execute on an Android device.

@@ -4,10 +4,11 @@ import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.SuppressLint;
 import android.app.UiAutomation;
 import android.content.Context;
+
+import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.uiautomator.UiDevice;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
-import androidx.test.InstrumentationRegistry;
 
 import com.netease.open.libpoco.sdk.AbstractNode;
 import com.netease.open.libpoco.sdk.IScreen;

@@ -6,16 +6,20 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
-import androidx.appcompat.app.AppCompatActivity;
+//import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.netease.open.pocoservice.R;
 
 public class TestActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_test);
+//        setContentView(R.layout.activity_test);
     }
 
     @Override
