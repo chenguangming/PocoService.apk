@@ -1,8 +1,11 @@
 package com.netease.open.hrpc.backend;
 
+import static com.netease.open.hrpc.backend.MethodMatcher.findMatchingMethod;
+
 import android.annotation.TargetApi;
 import android.util.JsonReader;
 import android.util.JsonWriter;
+import android.util.Log;
 
 import org.apache.commons.lang3.SystemUtils;
 import org.json.JSONArray;
@@ -30,8 +33,9 @@ import fi.iki.elonen.NanoHTTPD;
  */
 
 public class RpcServer extends NanoHTTPD {
+    private static final String TAG = "RpcServer";
 
-    private Map<String, Object> objUriStore_ = new HashMap<>();
+    private final Map<String, Object> objUriStore_ = new HashMap<>();
 
     public RpcServer(String hostname, int port) throws IOException {
         super(hostname, port);
@@ -53,7 +57,6 @@ public class RpcServer extends NanoHTTPD {
         } catch (JSONException e) {
             return newFixedLengthResponse(Response.Status.INTERNAL_ERROR, NanoHTTPD.MIME_PLAINTEXT, ExceptionUtils.getStackTrace(e));
         }
-        System.out.println(req.toString());
         JSONObject resp = this.onRequest(req);
         if (resp != null) {
             return newFixedLengthResponse(Response.Status.OK, "application/json; charset=utf-8", resp.toString());
@@ -62,13 +65,13 @@ public class RpcServer extends NanoHTTPD {
         }
     }
 
-    @TargetApi(19)
     public JSONObject onRequest(JSONObject req) {
         JSONObject resp = null;
         String sessionId = null;
         String reqId = null;
         String uri = null;
         JSONArray method = null;
+        Log.d(TAG, "req = " + req);
         try {
             sessionId = req.getString("session_id");
             reqId = req.getString("id");
@@ -101,9 +104,6 @@ public class RpcServer extends NanoHTTPD {
                     _this = obj;
                     String params = operation.getString(1);
                     Class<?> objCls = obj.getClass();
-                    if (objCls == null) {
-                        return this.buildErrorResponseObjectNotFound(reqId, sessionId, uri);
-                    }
 
                     for (java.lang.reflect.Method m : objCls.getMethods()) {
                         // 先把所有名字相同的方法都存起来，在调用的时候根据参数类型去选出重载的方法
@@ -138,35 +138,7 @@ public class RpcServer extends NanoHTTPD {
                         }
                     }
 
-                    // 根据参数类型选出重载方法
-                    java.lang.reflect.Method func = null;
-                    for (java.lang.reflect.Method m : _overloadMethods) {
-                        Class<?>[] paramTypes = m.getParameterTypes();
-                        if (paramTypes.length == calcArguments.size()) {
-                            boolean matched = true;
-//                            System.out.println(m);
-                            for (int j = 0; j < paramTypes.length; j++) {
-                                Class<?> parType = paramTypes[j];
-                                Class<?> argType = calcArguments.get(j).getClass();
-                                // 下面这行用来调试重载函数参数匹配
-                                // ystem.out.println(String.format("%s | %s | %s | %s | %s", _overloadMethodName, parType, argType, parType.isAssignableFrom(argType), primitiveTypeAssignableFrom(parType, argType)));
-                                if (parType.isArray() != argType.isArray()) {
-                                    matched = false;
-                                    break;
-                                }
-                                if (!parType.isAssignableFrom(argType) && !primitiveTypeAssignableFrom(parType, argType)) {
-                                    matched = false;
-                                    break;
-                                }
-                            }
-                            if (matched) {
-                                func = m;
-                                break;
-                            }
-                        }
-                    }
-                    _overloadMethods.clear();
-
+                    java.lang.reflect.Method func = findMatchingMethod(_overloadMethods, _overloadMethodName, calcArguments);
                     if (func != null) {
                         obj = func.invoke(_this, calcArguments.toArray());
                     } else {
@@ -201,10 +173,6 @@ public class RpcServer extends NanoHTTPD {
 
                 } else if (operator.equals("=")) {
                     Class<?> objCls = obj.getClass();
-                    if (objCls == null) {
-                        resp = this.buildErrorResponse(reqId, sessionId, "RuntimeError", String.format("Cannot retrieve class of RPC object. uri=\"%s\"", uri), "", "");
-                        return resp;
-                    }
 
                     JSONArray params = operation.getJSONArray(1);
                     String fieldName = params.getString(0);
@@ -215,10 +183,6 @@ public class RpcServer extends NanoHTTPD {
 
                 } else if (operator.equals("=uri")) {
                     Class<?> objCls = obj.getClass();
-                    if (objCls == null) {
-                        resp = this.buildErrorResponse(reqId, sessionId, "RuntimeError", String.format("Cannot retrieve class of RPC object. uri=\"%s\"", uri), "", "");
-                        return resp;
-                    }
 
                     JSONArray params = operation.getJSONArray(1);
                     String fieldName = params.getString(0);
@@ -262,22 +226,9 @@ public class RpcServer extends NanoHTTPD {
             resp = this.buildErrorResponse(reqId, sessionId, cause.getClass().getName(), cause.getMessage(), "", ExceptionUtils.getStackTrace(cause));
         }
 
-        return resp;
-    }
+        Log.d(TAG, "resp = " + resp);
 
-    private static boolean primitiveTypeAssignableFrom(Class<?> parType, Class<?> argType) {
-        if (parType.isPrimitive() || argType.isPrimitive()) {
-            String[] parTypeNameArray = parType.getName().toLowerCase().split(Pattern.quote("."));
-            String[] argTypeNameArray = argType.getName().toLowerCase().split(Pattern.quote("."));
-            String parTypeName = parTypeNameArray[parTypeNameArray.length - 1];
-            String argTypeName = argTypeNameArray[argTypeNameArray.length - 1];
-            if (parTypeName.length() < argTypeName.length()) {
-                return argTypeName.startsWith(parTypeName);
-            } else {
-                return parTypeName.startsWith(argTypeName);
-            }
-        }
-        return false;
+        return resp;
     }
 
     private JSONObject buildResponse(String id, String sessionId, Object result, String uri) {

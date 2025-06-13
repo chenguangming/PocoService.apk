@@ -3,8 +3,8 @@ package com.netease.open.pocoservice;
 import android.app.Instrumentation;
 import android.app.UiAutomation;
 import android.content.Context;
-import androidx.test.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.uiautomator.UiObject;
 import android.view.accessibility.AccessibilityNodeInfo;
 
@@ -31,9 +31,9 @@ public class InstrumentedTestAsLauncher {
     public void launch() throws Exception {
         Instrumentation ins = InstrumentationRegistry.getInstrumentation();
         UiAutomationConnection uiConn = new UiAutomationConnection(ins);
-        Context context = InstrumentationRegistry.getTargetContext();
+        Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
 
-        new ServerForHierarchyViewer(InstrumentationRegistry.getTargetContext(), uiConn);
+        new ServerForHierarchyViewer(context, uiConn);
 
         RpcServer rpc = new RpcServer("0.0.0.0", 10081);
         rpc.export("poco-uiautomation-framework", new PocoUiautomation(context, uiConn));

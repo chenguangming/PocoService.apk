@@ -23,7 +23,7 @@ import org.json.JSONException;
  */
 
 public class Input implements IInput {
-    private static final String TAG = Input.class.getName();
+    private static final String TAG = "Input";
 
     private Context context;
     private UiAutomationConnection uiConnn = null;
@@ -35,6 +35,7 @@ public class Input implements IInput {
 
     @Override
     public void keyevent(int keycode) {
+        Log.d(TAG, "keyevent " + keycode);
         UiAutomation uiauto = this.uiConnn.get();
         uiauto.injectInputEvent(new KeyEvent(KeyEvent.ACTION_DOWN, keycode), true);
         uiauto.injectInputEvent(new KeyEvent(KeyEvent.ACTION_UP, keycode), true);
@@ -42,6 +43,7 @@ public class Input implements IInput {
 
     @Override
     public void click(double x, double y) {
+        Log.d(TAG, "click x=" + x + ", y=" + y);
         down(x, y);
         up(x, y);
     }
@@ -53,6 +55,7 @@ public class Input implements IInput {
 
     @Override
     public void longClick(double x, double y, double duration) {
+        Log.d(TAG, "longClick x=" + x + ", y=" + y + ", duration=" + duration);
         // duration: 单位秒
         down(x, y);
         SystemClock.sleep((long) (duration * 1000));
@@ -62,6 +65,7 @@ public class Input implements IInput {
 
     @Override
     public void swipe(double x1, double y1, double x2, double y2, double duration) {
+        Log.d(TAG, "swipe x1=" + x1 + ", y1=" + y1 + ", x2=" + x2 + ", y2=" + y2 + ", duration=" + duration);
         final int interval = 25;
         int steps = (int) (duration * 1000 / interval + 1);
         double dx = (x2 - x1) / steps;
@@ -82,6 +86,7 @@ public class Input implements IInput {
         int w = size[0];
         int h = size[1];
 
+        Log.d(TAG, "applyMotionEvents: " + events.toString());
         SparseArray<MotionEvent.PointerProperties> pps = new SparseArray<>(5);
         SparseArray<MotionEvent.PointerCoords> pcs = new SparseArray<>(5);
 
@@ -309,6 +314,7 @@ public class Input implements IInput {
             throw new IllegalArgumentException("Must provide coordinates for at least 2 pointers");
         }
 
+        Log.d(TAG, "performMultiPointerGesture");
         // Get the pointer with the max steps to inject.
         int maxSteps = 0;
         for (int x = 0; x < touches.length; x++)

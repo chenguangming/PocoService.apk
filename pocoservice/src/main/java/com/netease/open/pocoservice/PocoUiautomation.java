@@ -3,6 +3,7 @@ package com.netease.open.pocoservice;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.app.UiAutomation;
 import android.content.Context;
+import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 
 import com.netease.open.libpoco.sdk.IPocoUiautomation;
@@ -19,6 +20,7 @@ import com.netease.open.libpoco.sdk.Selector;
  */
 
 public class PocoUiautomation implements IPocoUiautomation {
+    private static final String TAG = "PocoUiautomation";
     private Context context = null;
     private UiAutomationConnection uiConn = null;
 
@@ -50,10 +52,13 @@ public class PocoUiautomation implements IPocoUiautomation {
                 AccessibilityServiceInfo.FLAG_REPORT_VIEW_IDS |
                 AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS;
         uiauto.setServiceInfo(accessibilityServiceInfo);
+
+        Log.d(TAG, "PocoUiautomation");
     }
 
     public boolean uiAutomationConnected() {
         try {
+            Log.d(TAG, "uiAutomationConnected");
             this.uiConn.get().getRootInActiveWindow();
             return true;
         } catch (IllegalStateException e) {

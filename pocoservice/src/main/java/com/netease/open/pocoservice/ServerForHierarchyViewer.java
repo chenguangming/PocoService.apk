@@ -28,7 +28,7 @@ import fi.iki.elonen.NanoHTTPD;
 
 @SuppressLint("NewApi")
 public class ServerForHierarchyViewer extends NanoHTTPD {
-    private static final String TAG = ServerForHierarchyViewer.class.getName();
+    private static final String TAG = "ServerForHierarchyViewer";
 
     private Context context;
     private UiAutomationConnection uiConn;
@@ -70,6 +70,7 @@ public class ServerForHierarchyViewer extends NanoHTTPD {
         String path = session.getUri();
         String ret = "- empty -";
         String mimeType = NanoHTTPD.MIME_PLAINTEXT;
+        Log.i(TAG, "server serve " + path);
 
         switch (path) {
             case "/uiautomation/connectionState":
